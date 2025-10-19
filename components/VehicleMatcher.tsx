@@ -31,29 +31,36 @@ export default function VehicleMatcher({ financialData }: VehicleMatcherProps) {
     useState<VehicleRecommendation | null>(null);
   const [filters, setFilters] = useState({
     priceRange: [20000, 80000],
-    vehicleType: financialData.preferences.vehicleType,
+    vehicleType: financialData.preferences.vehicleType as "sedan" | "suv" | "truck" | "hybrid" | "luxury" | "all",
     monthlyPayment: financialData.goals.monthlyPaymentTarget,
   });
 
   useEffect(() => {
+    // Generate recommendations whenever financial data changes
     generateVehicleRecommendations();
+    
+    // Update filters based on financial data
+    setFilters({
+      priceRange: [Math.max(15000, financialData.preferences.budget * 0.7), Math.min(80000, financialData.preferences.budget * 1.2)],
+      vehicleType: financialData.preferences.vehicleType,
+      monthlyPayment: financialData.goals.monthlyPaymentTarget,
+    });
   }, [financialData]);
 
   useEffect(() => {
     applyFilters();
   }, [vehicles, filters]);
 
-  const generateVehicleRecommendations = () => {
-    const mockVehicles: VehicleRecommendation[] = [
-      {
+    const generateVehicleRecommendations = () => {
+      // Mock vehicle data - Represents local test data
+      const mockVehicles = [{
         id: "camry-hybrid",
         name: "Camry Hybrid",
         model: "Camry",
         year: 2024,
         price: 28000,
         monthlyPayment: 420,
-        image:
-          "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400",
+        image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400",
         features: [
           "Hybrid Engine",
           "Safety Sense 2.5+",
@@ -70,8 +77,7 @@ export default function VehicleMatcher({ financialData }: VehicleMatcherProps) {
         year: 2024,
         price: 32000,
         monthlyPayment: 480,
-        image:
-          "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400",
+        image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400",
         features: [
           "AWD",
           "Hybrid Engine",
@@ -88,8 +94,7 @@ export default function VehicleMatcher({ financialData }: VehicleMatcherProps) {
         year: 2024,
         price: 24000,
         monthlyPayment: 360,
-        image:
-          "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=400",
+        image: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=400",
         features: [
           "Compact SUV",
           "Safety Sense 2.0",
@@ -106,8 +111,7 @@ export default function VehicleMatcher({ financialData }: VehicleMatcherProps) {
         year: 2024,
         price: 38000,
         monthlyPayment: 570,
-        image:
-          "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=400",
+        image: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=400",
         features: [
           "3-Row Seating",
           "V6 Engine",
@@ -124,8 +128,7 @@ export default function VehicleMatcher({ financialData }: VehicleMatcherProps) {
         year: 2024,
         price: 35000,
         monthlyPayment: 525,
-        image:
-          "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400",
+        image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400",
         features: [
           "Off-Road Capable",
           "V6 Engine",
@@ -142,8 +145,7 @@ export default function VehicleMatcher({ financialData }: VehicleMatcherProps) {
         year: 2024,
         price: 26000,
         monthlyPayment: 390,
-        image:
-          "https://images.unsplash.com/photo-1563720223185-11003d516935?w=400",
+        image: "https://images.unsplash.com/photo-1563720223185-11003d516935?w=400",
         features: [
           "Hybrid Engine",
           "Excellent MPG",
@@ -152,11 +154,11 @@ export default function VehicleMatcher({ financialData }: VehicleMatcherProps) {
         ],
         matchScore: 90,
         financingOptions: [],
-      },
-    ];
+      }
+      ];
 
-    // Calculate match scores based on user preferences
-    const scoredVehicles = mockVehicles.map((vehicle) => {
+      // Calculate match scores based on user preferences
+      const scoredVehicles = mockVehicles.map((vehicle) => {
       let score = 0;
 
       // Price match (40% weight)
@@ -341,7 +343,10 @@ export default function VehicleMatcher({ financialData }: VehicleMatcherProps) {
             <select
               value={filters.vehicleType}
               onChange={(e) =>
-                setFilters((prev) => ({ ...prev, vehicleType: e.target.value }))
+                setFilters((prev) => ({ 
+                  ...prev, 
+                  vehicleType: e.target.value as "all" | "sedan" | "suv" | "truck" | "hybrid" | "luxury"
+                }))
               }
               className="input-field"
             >

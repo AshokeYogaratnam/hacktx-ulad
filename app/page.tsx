@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Car,
@@ -9,7 +9,12 @@ import {
   Trophy,
   TrendingUp,
   Shield,
+  LogIn,
+  LogOut,
+  UserPlus,
 } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
+import AuthModal from "@/components/AuthModal";
 import Hero from "@/components/Hero";
 import FinancialProfile from "@/components/FinancialProfile";
 import ProgressiveProfile from "@/components/ProgressiveProfile";
@@ -17,18 +22,53 @@ import Dashboard from "@/components/Dashboard";
 import { FinancialData } from "@/types/financial";
 
 export default function Home() {
+  const { user, logout, getFinancialData, updateFinancialData } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const [currentStep, setCurrentStep] = useState<
     "hero" | "profile" | "dashboard"
   >("hero");
   const [financialData, setFinancialData] = useState<FinancialData | null>(
     null
   );
+  const [dashboardInitialTab, setDashboardInitialTab] = useState<
+    "overview" | "calculator" | "vehicles" | "coach" | "achievements"
+  >("overview");
   const [progressiveMode, setProgressiveMode] = useState(false);
 
-  const handleProfileComplete = (data: FinancialData) => {
-    setFinancialData(data);
-    setCurrentStep("dashboard");
+  const handleLogin = () => {
+    setAuthMode("login");
+    setShowAuthModal(true);
   };
+
+  const handleRegister = () => {
+    setAuthMode("register");
+    setShowAuthModal(true);
+  };
+
+  const handleProfileComplete = (data: FinancialData) => {
+    // Update financial data in both local state and auth context
+    setFinancialData(data);
+    if (user) {
+      updateFinancialData(data);
+    }
+    // After saving the profile, return the user to the front page (hero)
+    setCurrentStep("hero");
+  };
+
+  // On mount or user change, attempt to load saved financial profile
+  useEffect(() => {
+    if (user) {
+      // Try to load financial data from auth context
+      const savedData = getFinancialData();
+      if (savedData) {
+        setFinancialData(savedData);
+      }
+    } else {
+      // Clear financial data when user logs out
+      setFinancialData(null);
+    }
+  }, [user]);
 
   const handleBackToProfile = () => {
     setCurrentStep("profile");
@@ -52,19 +92,59 @@ export default function Home() {
               </span>
             </div>
 
-            {currentStep !== "hero" && (
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={handleBackToProfile}
-                  className="text-gray-600 hover:text-toyota-red transition-colors"
-                >
-                  Edit Profile
-                </button>
-                <button onClick={handleStartOver} className="btn-secondary">
-                  Start Over
-                </button>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={handleStartOver}
+                className="btn-primary flex items-center space-x-2 text-sm"
+              >
+                <Car className="h-4 w-4" />
+                <span>Return Home</span>
+              </button>
+              
+              {currentStep !== "hero" && (
+                <>
+                  <button
+                    onClick={handleBackToProfile}
+                    className="text-gray-600 hover:text-toyota-red transition-colors"
+                  >
+                    Edit Profile
+                  </button>
+                  <button onClick={handleStartOver} className="btn-secondary">
+                    Start Over
+                  </button>
+                </>
+              )}
+
+              <div className="ml-4 flex items-center space-x-4 border-l pl-4">
+                {user ? (
+                  <>
+                    <span className="text-sm text-gray-600">
+                      Welcome, {user.username}
+                    </span>
+                    <button
+                      onClick={logout}
+                      className="flex items-center space-x-2 text-gray-600 hover:text-toyota-red transition-colors"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Sign Out</span>
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={handleLogin}
+                    className="flex items-center space-x-2 text-gray-600 hover:text-toyota-red transition-colors"
+                  >
+                    <LogIn className="h-4 w-4" />
+                    <span>Sign In</span>
+                  </button>
+                )}
               </div>
-            )}
+            </div>
+
+            <AuthModal 
+              isOpen={showAuthModal}
+              onClose={() => setShowAuthModal(false)}
+            />
           </div>
         </div>
       </nav>
@@ -73,10 +153,32 @@ export default function Home() {
       <main className="pt-16">
         {currentStep === "hero" && (
           <Hero
-            onGetStarted={() => setCurrentStep("profile")}
+            onGetStarted={() => {
+              if (user) {
+                setCurrentStep("profile");
+              } else {
+                handleLogin();
+              }
+            }}
             onSmartStart={() => {
-              setProgressiveMode(true);
-              setCurrentStep("profile");
+              if (user) {
+                setProgressiveMode(true);
+                setCurrentStep("profile");
+              } else {
+                handleLogin();
+              }
+            }}
+            onExploreVehicles={() => {
+              // If user has completed their financial profile, show vehicle recommendations
+              if (financialData) {
+                setDashboardInitialTab("vehicles");
+                setCurrentStep("dashboard");
+              } else {
+                // If no profile exists, guide them to create one with focus on vehicle preferences
+                setCurrentStep("profile");
+                // Show a message about completing profile to get personalized recommendations
+                alert("Please complete your financial profile to get personalized vehicle recommendations based on your budget and preferences.");
+              }
             }}
           />
         )}
@@ -102,6 +204,7 @@ export default function Home() {
           <Dashboard
             financialData={financialData}
             onEditProfile={handleBackToProfile}
+            initialTab={dashboardInitialTab}
           />
         )}
       </main>

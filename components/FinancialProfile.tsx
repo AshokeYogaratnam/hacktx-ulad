@@ -56,6 +56,7 @@ export default function FinancialProfile({
     watch,
     formState: { errors },
     setValue,
+    trigger,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -68,6 +69,8 @@ export default function FinancialProfile({
       loanTerm: 60,
       vehicleType: "sedan",
       monthlyPaymentTarget: 400,
+      lifestyle: [],
+      financialGoals: [],
     },
   });
 
@@ -92,15 +95,19 @@ export default function FinancialProfile({
   ];
 
   const toggleLifestyle = (id: string) => {
-    setSelectedLifestyle((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+    setSelectedLifestyle((prev) => {
+      const next = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
+      setValue("lifestyle", next);
+      return next;
+    });
   };
 
   const toggleGoal = (id: string) => {
-    setSelectedGoals((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+    setSelectedGoals((prev) => {
+      const next = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
+      setValue("financialGoals", next);
+      return next;
+    });
   };
 
   const onSubmit = (data: ProfileFormData) => {
@@ -455,6 +462,36 @@ export default function FinancialProfile({
                       {watchedValues.vehicleType}
                     </span>
                   </div>
+                  <div>
+                    <span className="text-gray-600">Lifestyle:</span>
+                    <div className="ml-2 font-medium">
+                      {selectedLifestyle.length > 0 ? (
+                        <ul className="list-disc list-inside">
+                          {selectedLifestyle.map((l) => (
+                            <li key={l} className="capitalize">
+                              {l.replace("-", " ")}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <span className="ml-2 text-gray-500">None selected</span>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Goals:</span>
+                    <div className="ml-2 font-medium">
+                      {selectedGoals.length > 0 ? (
+                        <ul className="list-disc list-inside">
+                          {selectedGoals.map((g) => (
+                            <li key={g}>{g.replace("-", " ")}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <span className="ml-2 text-gray-500">None selected</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -478,10 +515,39 @@ export default function FinancialProfile({
                 <ArrowRight className="h-5 w-5 ml-2" />
               </button>
             ) : (
-              <button type="submit" className="btn-primary">
-                Complete Profile
-                <Check className="h-5 w-5 ml-2" />
-              </button>
+              <>
+                <div className="flex-1 pr-4">
+                  {/* Show validation errors summary to help the user */}
+                  {Object.keys(errors).length > 0 && (
+                    <div className="text-sm text-red-600">
+                      Please fix the highlighted fields before continuing.
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={async () => {
+                    const ok = await trigger();
+                    if (ok) {
+                      // call form submit
+                      handleSubmit(onSubmit)();
+                    } else {
+                      // focus the first invalid input if possible
+                      const firstError = Object.keys(errors)[0];
+                      if (firstError) {
+                        const el = document.querySelector(
+                          `[name="${firstError}"]`
+                        ) as HTMLElement | null;
+                        el?.focus();
+                      }
+                    }
+                  }}
+                >
+                  Complete Profile
+                  <Check className="h-5 w-5 ml-2" />
+                </button>
+              </>
             )}
           </div>
         </form>

@@ -6,9 +6,10 @@ import { Car, ArrowRight, Sparkles, TrendingUp, Shield, Brain } from "lucide-rea
 interface HeroProps {
   onGetStarted: () => void;
   onSmartStart?: () => void;
+  onExploreVehicles?: () => void;
 }
 
-export default function Hero({ onGetStarted, onSmartStart }: HeroProps) {
+export default function Hero({ onGetStarted, onSmartStart, onExploreVehicles }: HeroProps) {
   return (
     <div className="relative overflow-hidden">
       {/* Background */}
@@ -75,7 +76,10 @@ export default function Hero({ onGetStarted, onSmartStart }: HeroProps) {
               )}
             </div>
 
-            <button className="group bg-white/20 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/30 transition-all duration-300 flex items-center space-x-2">
+            <button
+              onClick={onExploreVehicles}
+              className="group bg-white/20 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/30 transition-all duration-300 flex items-center space-x-2"
+            >
               <Car className="h-5 w-5" />
               <span>Explore Vehicles</span>
             </button>

@@ -31,15 +31,17 @@ import AchievementPanel from "./AchievementPanel";
 interface DashboardProps {
   financialData: FinancialData;
   onEditProfile: () => void;
+  initialTab?: "overview" | "calculator" | "vehicles" | "coach" | "achievements";
 }
 
 export default function Dashboard({
   financialData,
   onEditProfile,
+  initialTab,
 }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<
     "overview" | "calculator" | "vehicles" | "coach" | "achievements"
-  >("overview");
+  >(initialTab ?? "overview");
   const [financialHealth, setFinancialHealth] =
     useState<FinancialHealthScore | null>(null);
   const [aiRecommendations, setAIRecommendations] = useState<
@@ -47,6 +49,9 @@ export default function Dashboard({
   >([]);
 
   useEffect(() => {
+    // If parent requests a specific initial tab, apply it
+    if (initialTab) setActiveTab(initialTab);
+
     // Calculate financial health score
     const healthScore = calculateFinancialHealth(financialData);
     setFinancialHealth(healthScore);

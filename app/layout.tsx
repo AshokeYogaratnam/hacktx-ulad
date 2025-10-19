@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import dynamic from "next/dynamic";
+import { AuthProvider } from "@/contexts/auth-context";
 
 const Chatbot = dynamic(() => import("@/components/Chatbot"), { ssr: false });
 
@@ -20,19 +21,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased">
-        {children}
-        <Chatbot />
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: "#363636",
-              color: "#fff",
-            },
-          }}
-        />
+      <body className="antialiased font-sans">
+        <AuthProvider>
+          {children}
+          <Chatbot />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: "#363636",
+                color: "#fff",
+              },
+            }}
+          />
+        </AuthProvider>
       </body>
     </html>
   );
