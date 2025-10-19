@@ -1,13 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Car, ArrowRight, Sparkles, TrendingUp, Shield } from "lucide-react";
+import { Car, ArrowRight, Sparkles, TrendingUp, Shield, Brain } from "lucide-react";
 
 interface HeroProps {
   onGetStarted: () => void;
+  onSmartStart?: () => void;
 }
 
-export default function Hero({ onGetStarted }: HeroProps) {
+export default function Hero({ onGetStarted, onSmartStart }: HeroProps) {
   return (
     <div className="relative overflow-hidden">
       {/* Background */}
@@ -54,13 +55,25 @@ export default function Hero({ onGetStarted }: HeroProps) {
             transition={{ delay: 0.3, duration: 0.8 }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
           >
-            <button
-              onClick={onGetStarted}
-              className="group bg-white text-toyota-red px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl"
-            >
-              <span>Start Your Journey</span>
-              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </button>
+            <div className="flex gap-4">
+              <button
+                onClick={onGetStarted}
+                className="group bg-white text-toyota-red px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl"
+              >
+                <span>Start Your Journey</span>
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+
+              {onSmartStart && (
+                <button
+                  onClick={onSmartStart}
+                  className="group bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 flex items-center space-x-2"
+                >
+                  <Brain className="h-5 w-5" />
+                  <span>Smart Start</span>
+                </button>
+              )}
+            </div>
 
             <button className="group bg-white/20 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/30 transition-all duration-300 flex items-center space-x-2">
               <Car className="h-5 w-5" />

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Hero from "@/components/Hero";
 import FinancialProfile from "@/components/FinancialProfile";
+import ProgressiveProfile from "@/components/ProgressiveProfile";
 import Dashboard from "@/components/Dashboard";
 import { FinancialData } from "@/types/financial";
 
@@ -22,6 +23,7 @@ export default function Home() {
   const [financialData, setFinancialData] = useState<FinancialData | null>(
     null
   );
+  const [progressiveMode, setProgressiveMode] = useState(false);
 
   const handleProfileComplete = (data: FinancialData) => {
     setFinancialData(data);
@@ -70,13 +72,29 @@ export default function Home() {
       {/* Main Content */}
       <main className="pt-16">
         {currentStep === "hero" && (
-          <Hero onGetStarted={() => setCurrentStep("profile")} />
+          <Hero
+            onGetStarted={() => setCurrentStep("profile")}
+            onSmartStart={() => {
+              setProgressiveMode(true);
+              setCurrentStep("profile");
+            }}
+          />
         )}
 
-        {currentStep === "profile" && (
+        {currentStep === "profile" && !progressiveMode && (
           <FinancialProfile
             onComplete={handleProfileComplete}
             onBack={() => setCurrentStep("hero")}
+          />
+        )}
+
+        {currentStep === "profile" && progressiveMode && (
+          <ProgressiveProfile
+            onComplete={(data) => {
+              handleProfileComplete(data);
+              setProgressiveMode(false);
+            }}
+            onCancel={() => setProgressiveMode(false)}
           />
         )}
 

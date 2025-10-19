@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import dynamic from "next/dynamic";
+
+const Chatbot = dynamic(() => import("@/components/Chatbot"), { ssr: false });
 
 export const metadata: Metadata = {
   title: "Toyota Financial Navigator",
@@ -19,6 +22,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         {children}
+        <Chatbot />
         <Toaster
           position="top-right"
           toastOptions={{
